@@ -289,7 +289,7 @@ form.addEventListener('submit', (ev) => {
   ev.preventDefault();
   render(evaluate(readForm()));
 });
-// 「重新評估」：整份表單回到初始狀態（所有欄位、藥品查詢結果、HoFH 連動、結果卡與病歷摘要），再重算停用狀態
+// 「清空重評」：整份表單回到初始狀態（所有欄位、藥品查詢結果、HoFH 連動、結果卡與病歷摘要），再重算停用狀態
 function resetAll() {
   resetFields(form);
   hofhAuto = false;
