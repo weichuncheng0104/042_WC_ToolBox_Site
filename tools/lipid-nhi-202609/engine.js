@@ -305,14 +305,14 @@ function evalTable2(x) {
     if (rowAt(rfCount) !== rowAt(rfCount + rfUnknown)) {
       const cite = 'F p.40 危險因子定義';
       return { row: { id: null, label: '無法判定（缺性別／年齡）', cite }, rf: tf, rfCount, nonPharm: null, followUp: [T2RX],
-        notes: [item('TOOL-NOSEX', `表二危險因子 2 需性別與年齡才能判定，可能改變列別；目前可判項目為 ${rfCount} 項。`, cite)],
-        eligibility: { status: 'undetermined', gap: null, lifestyleFirst: null, ruleId: 'TOOL-NOSEX', cite, need: 'needs sex/age', text: '本工具無法判定：請填性別、年齡（表二危險因子 2 可能改變列別）' },
+        notes: [item('TOOL-NOSEX', `表二危險因子「男性≧45歲，女性≧55歲或停經者」需性別與年齡才能判定，可能改變列別；目前可判項目為 ${rfCount} 項。`, cite)],
+        eligibility: { status: 'undetermined', gap: null, lifestyleFirst: null, ruleId: 'TOOL-NOSEX', cite, need: 'needs sex/age', text: '本工具無法判定：請填性別、年齡（表二危險因子「男性≧45歲，女性≧55歲或停經者」可能改變列別）' },
         targets: { ldl: { value: null, met: null }, tc: { value: null, met: null }, nonhdl: { value: null, text: '表二未列' } } };
     }
   }
   const out = { row: { id: row.id, label: row.label, cite: row.cite }, rf: tf, rfCount, notes: [], followUp: [T2RX] };
   if (row.id !== 'T2-1' && row.id !== 'T2-2' && rfUnknown > 0) {
-    out.notes.push(item('TOOL-NOSEX', '性別或年齡未填：表二危險因子 2 未判定（本例不影響列別）。', 'F p.40 危險因子定義'));
+    out.notes.push(item('TOOL-NOSEX', '性別或年齡未填：表二危險因子「男性≧45歲，女性≧55歲或停經者」未判定（本例不影響列別）。', 'F p.40 危險因子定義'));
   }
   if (x.smoking && row.id !== 'T2-1' && row.id !== 'T2-2') {
     out.notes.push(item('T2-RF-5', '「因吸菸而符合起步治療準則之個案，若未戒菸而要求藥物治療，應以自費治療」（此條只見於表二危險因子定義，表一無此規定）。', 'F p.40 危險因子定義 5'));

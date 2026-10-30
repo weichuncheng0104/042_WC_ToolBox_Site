@@ -160,6 +160,7 @@
         <span class="lbl">事件後一年內是否已開始使用最大耐受劑量 statin？（附表二-D 3.1，首次申請必要條件；statin 禁忌症／不耐受者最大耐受劑量可為零，Q20）</span>
         <label><input type="radio" name="max_statin_within_1y" value="yes"> 是</label>
         <label><input type="radio" name="max_statin_within_1y" value="no"> 否</label>
+        <button type="button" class="clr" data-clear="max_statin_within_1y" aria-label="清除：事件後一年內是否已開始使用最大耐受劑量 statin（回到未答）">清除</button>
       </div>
       <p class="hint" id="q14-pathii" hidden>statin 禁忌症或不耐受（第 7 區已勾）：路徑 II 不必回答此題，視為符合（Q20）；申請時應敘明 statin 禁忌症／不耐受理由。</p>
       <label class="num">事件日期（僅供病歷摘要，不參與判定）<input type="date" name="event_date"></label>
@@ -173,11 +174,13 @@
         <span class="lbl">基因檢測未檢出同合子或多重基因異常？</span>
         <label><input type="radio" name="hofh_gene_negative" value="yes"> 是</label>
         <label><input type="radio" name="hofh_gene_negative" value="no"> 否</label>
+        <button type="button" class="clr" data-clear="hofh_gene_negative" aria-label="清除：基因檢測未檢出同合子或多重基因異常（回到未答）">清除</button>
       </div>
       <div class="row">
-        <span class="lbl">已確診同合子家族性高膽固醇血症？</span>
+        <span class="lbl">已確診同合子家族性高膽固醇血症？（第 7 區勾「診斷：HoFH」時自動帶入「是」，可改）</span>
         <label><input type="radio" name="hofh_dx_confirmed" value="yes"> 是</label>
         <label><input type="radio" name="hofh_dx_confirmed" value="no"> 否</label>
+        <button type="button" class="clr" data-clear="hofh_dx_confirmed" aria-label="清除：已確診同合子家族性高膽固醇血症（回到未答）">清除</button>
       </div>
       <p class="hint">臨床徵狀（需 ≧3 項）：</p>
       <label class="sub"><input type="checkbox" name="hofh_c1"> i. 10 歲前出現皮膚或肌腱黃色瘤</label>

@@ -22,6 +22,7 @@ details.sec summary { cursor: pointer; padding: .2rem 0; }
 .sec.locked { opacity: .55; }
 .sec.locked .lock-msg { display: inline; }
 .row.off { opacity: .55; }
+.clr { font: inherit; font-size: .8rem; padding: .15rem .6rem; border: 1px solid var(--line); border-radius: 4px; background: #fff; color: var(--muted); cursor: pointer; }
 .actions { display: flex; gap: .6rem; margin: 1rem 0; }
 .btn { font: inherit; font-weight: 600; padding: .6rem 1.4rem; border-radius: 6px; border: 1px solid var(--accent); background: #fff; color: var(--accent); cursor: pointer; min-height: 2.75rem; }
 .btn.primary { background: var(--accent); color: #fff; }

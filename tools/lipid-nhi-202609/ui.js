@@ -4,6 +4,7 @@ import { renderHeader, renderFooter } from '../../common/layout.js';
 import { evaluate } from './engine.js';
 import { lookupDrug, infoOf, NOT_FOUND_TEXT, COVERAGE_NOTE } from './drug_lookup.js';
 import { chartSummary } from './summary.js';
+import { clearRadios, linkHofh } from './tristate.js';
 
 const tool = TOOLS.find((t) => t.id === 'lipid-nhi-202609');
 document.getElementById('tool-name').textContent = tool.name;
@@ -41,7 +42,7 @@ function refresh() {
   for (const d of form.querySelectorAll('.subs[data-parent]')) d.hidden = !x[d.dataset.parent];
   // Q14 路徑 II：statin 禁忌症／不耐受 → 此題不必回答（引擎同樣忽略），停用並註明
   const pathII = x.statin_intolerant || x.statin_contraindicated;
-  for (const r of form.querySelectorAll('input[name="max_statin_within_1y"]')) r.disabled = pathII;
+  for (const r of form.querySelectorAll('input[name="max_statin_within_1y"], button[data-clear="max_statin_within_1y"]')) r.disabled = pathII;
   $('q14-row').classList.toggle('off', pathII);
   $('q14-pathii').hidden = !pathII;
 
@@ -279,6 +280,23 @@ $('drug-q').addEventListener('keydown', (ev) => {
   if (ev.key === 'Enter') { ev.preventDefault(); showDrugs(); }
 });
 
+// 第 7 區「診斷：HoFH」→ 第 8 區「已確診」帶入（須在 refresh 之前）；hofhAuto＝目前值為自動帶入且未手動改過
+let hofhAuto = false;
+form.addEventListener('change', (ev) => {
+  if (ev.target.name === 'dx_hofh') hofhAuto = linkHofh(form, ev.target.checked, hofhAuto);
+});
+// 手動點「已確診」即視為手動作答；用 click 而非 change，因再點已選的同一值不會發出 change
+form.addEventListener('click', (ev) => {
+  if (ev.target.name === 'hofh_dx_confirmed') hofhAuto = false;
+});
+for (const b of form.querySelectorAll('button[data-clear]')) {
+  b.addEventListener('click', () => {
+    clearRadios(form, b.dataset.clear);
+    if (b.dataset.clear === 'hofh_dx_confirmed') hofhAuto = false;
+    refresh();
+  });
+}
+
 form.addEventListener('input', refresh);
 form.addEventListener('change', refresh);
 form.addEventListener('submit', (ev) => {
@@ -287,6 +305,7 @@ form.addEventListener('submit', (ev) => {
 });
 $('reset').addEventListener('click', () => {
   form.reset();
+  hofhAuto = false;
   $('drug-q-out').replaceChildren();
   out.replaceChildren();
   out.hidden = true;
