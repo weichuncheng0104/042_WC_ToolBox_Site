@@ -136,7 +136,7 @@ export function localDate(d = new Date()) {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 }
 
-// date：呼叫端傳入的 YYYY-MM-DD（UI 以 localDate() 於顯示與複製時各取一次，跨日複製仍為當天）
+// date：呼叫端傳入的 YYYY-MM-DD（UI 只在按「評估」產生摘要時以 localDate() 取一次；「複製」照抄 textarea，不重產）
 export function chartSummary(r, date) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date ?? '')) throw new Error(`摘要日期須為 YYYY-MM-DD：${date}`);
   const x = r.input;

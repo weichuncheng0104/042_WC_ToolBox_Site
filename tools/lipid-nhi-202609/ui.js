@@ -192,7 +192,7 @@ function render(r) {
   out.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// 病歷用純文字摘要：只在本機剪貼簿，不送出
+// 病歷用純文字摘要：只在本機剪貼簿，不送出。日期只在按「評估」時取當下本機日期；「複製」照抄 textarea，不重產
 function renderChart(r) {
   const b = block('病歷用摘要（純文字，可貼回病歷）');
   b.classList.add('chart');
@@ -204,7 +204,6 @@ function renderChart(r) {
   btn.type = 'button';
   const msg = el('span', 'hint');
   btn.addEventListener('click', async () => {
-    ta.value = chartSummary(r, localDate());
     try {
       await navigator.clipboard.writeText(ta.value);
       msg.textContent = '已複製';
