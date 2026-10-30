@@ -14,28 +14,10 @@
 <script type="module">
 import { TOOLS } from './tools.js';
 import { renderHeader, renderFooter } from './common/layout.js';
+import { renderToolList } from './common/catalog.js';
 
 renderHeader('./', { showHome: false });
-const list = document.getElementById('tool-list');
-for (const t of TOOLS) {
-  const a = document.createElement('a');
-  a.className = 'tool-btn';
-  a.href = t.path + 'index.html';
-  const name = document.createElement('div');
-  name.className = 'name';
-  name.textContent = t.name;
-  if (t.status !== '上線') {
-    const b = document.createElement('span');
-    b.className = 'badge';
-    b.textContent = t.status;
-    name.append(b);
-  }
-  const desc = document.createElement('div');
-  desc.className = 'desc';
-  desc.textContent = t.description;
-  a.append(name, desc);
-  list.append(a);
-}
+renderToolList(document.getElementById('tool-list'), TOOLS);
 renderFooter();
 </script>
 </body>
