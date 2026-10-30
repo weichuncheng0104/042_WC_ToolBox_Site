@@ -5,22 +5,222 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>健保降血脂藥物評估工具｜看診工具箱</title>
 <link rel="stylesheet" href="../../common/style.css">
+<link rel="stylesheet" href="tool.css">
 </head>
 <body>
 <main>
   <h1 id="tool-name"></h1>
   <div class="notice">
-    <p><strong>開發中</strong>：本工具尚未提供評估功能。規則將依健保署公告原文建立並經人工校對後才上線。</p>
+    <p>規則依健保署藥品給付規定 2.6 原文建立。少數條文需解讀之處標示 Q 編號，解讀說明見頁尾。</p>
   </div>
-</main>
-<script type="module">
-import { TOOLS } from '../../tools.js';
-import { renderHeader, renderFooter } from '../../common/layout.js';
 
-const tool = TOOLS.find((t) => t.id === 'lipid-nhi-202609');
-document.getElementById('tool-name').textContent = tool.name;
-renderHeader('../../');
-renderFooter({ regulation: tool.regulation, officialUrl: tool.officialUrl });
-</script>
+  <form id="f" autocomplete="off">
+    <fieldset class="sec" data-sec="SCOPE">
+      <legend>0　適用表</legend>
+      <p class="q">預計／目前使用的降膽固醇藥品，是否為「2.6.1 總則所列表二適用品項」？</p>
+      <label><input type="radio" name="table_choice" value="no" checked> 否（適用表一）</label>
+      <label><input type="radio" name="table_choice" value="yes"> 是（僅適用表二）</label>
+      <label><input type="radio" name="table_choice" value="unsure"> 不確定（表一、表二並列）</label>
+      <div class="drug-q">
+        <label class="num">藥品查詢（健保代碼 10 碼，或藥名／成分部分字串）<input type="search" id="drug-q" autocomplete="off"></label>
+        <button type="button" id="drug-q-btn">查詢</button>
+        <p class="hint">查到後自動帶入本區或區 7 的清單品項選項。給付規定原文清單只列英文藥名，請以英文藥名或代碼查詢。清單依 115/10/22 版完整給付規定；品項會分階段調整。</p>
+        <div id="drug-q-out" aria-live="polite"></div>
+      </div>
+    </fieldset>
+
+    <fieldset class="sec" data-sec="BASIC">
+      <legend>1　基本資料與檢驗值</legend>
+      <div class="row">
+        <span class="lbl">性別</span>
+        <label><input type="radio" name="sex" value="M"> 男</label>
+        <label><input type="radio" name="sex" value="F"> 女</label>
+      </div>
+      <label class="num">年齡（歲）<input type="number" name="age" min="0" max="120" inputmode="numeric"></label>
+      <label class="sub" id="meno-wrap" hidden><input type="checkbox" name="postmenopausal"> 已停經（僅表二計入）</label>
+      <label class="num">開始藥物治療前 LDL-C（基線，mg/dL）<input type="number" name="ldl" min="0" inputmode="decimal"></label>
+      <label class="num">目前 LDL-C（治療中，mg/dL；已用藥才填）<input type="number" name="ldl_current" min="0" inputmode="decimal"></label>
+      <label class="num">HDL-C（mg/dL）<input type="number" name="hdl" min="0" inputmode="decimal"></label>
+      <label class="num">總膽固醇 TC（mg/dL）<input type="number" name="tc" min="0" inputmode="decimal"></label>
+      <label class="num">空腹 TG（mg/dL）<input type="number" name="tg" min="0" inputmode="decimal"></label>
+      <p class="auto-line">non-HDL-C（TC − HDL-C）：<b id="v-nonhdl">—</b>　TC/HDL-C：<b id="v-ratio">—</b> <span class="tag-auto">自動判定</span></p>
+    </fieldset>
+
+    <fieldset class="sec" data-sec="EX">
+      <legend>2　極高風險 <span class="lock-msg">已由較高層級判定</span></legend>
+      <label><input type="checkbox" name="cad" data-t1only> 冠狀動脈疾病</label>
+      <div class="subs" data-parent="cad">
+        <p class="hint">需合併下列任一項才屬極高風險：</p>
+        <label class="sub"><input type="checkbox" name="mi_within_1y" data-t1only> 一年內曾經歷心肌梗塞</label>
+        <label class="sub"><input type="checkbox" name="mi_count_ge2" data-t1only> ≧兩次心肌梗塞病史</label>
+        <label class="sub"><input type="checkbox" name="multivessel_cad" data-t1only> 多支冠狀動脈阻塞</label>
+        <label class="sub"><input type="checkbox" name="acs_with_dm" data-t1only> 急性冠心症合併糖尿病</label>
+        <label class="sub"><input type="checkbox" name="pad_or_carotid" data-t1only> 周邊動脈疾病或頸動脈狹窄</label>
+      </div>
+      <label><input type="checkbox" name="pad" data-t1only> 周邊動脈疾病</label>
+      <div class="subs" data-parent="pad">
+        <p class="hint">需合併下列任一項才屬極高風險：</p>
+        <label class="sub"><input type="checkbox" name="pad_with_cad" data-t1only> 冠狀動脈疾病</label>
+        <label class="sub"><input type="checkbox" name="pad_with_carotid" data-t1only> 頸動脈狹窄</label>
+      </div>
+      <p class="hint">「頸動脈狹窄」條文未定義程度，由臨床判定（非常高風險的影像定義為 ≧50%，供參）。</p>
+    </fieldset>
+
+    <fieldset class="sec" data-sec="VH">
+      <legend>3　非常高風險 <span class="lock-msg">已由較高層級判定</span></legend>
+      <label><input type="checkbox" name="acs_history"> 急性冠心症病史</label>
+      <label><input type="checkbox" name="revasc_pci_or_cabg"> 接受血管再通術（心導管介入治療或外科冠狀動脈繞道手術）</label>
+      <label><input type="checkbox" name="stroke_tia" data-t1only> 缺血性中風／短暫性腦缺血發作</label>
+      <div class="subs" data-parent="stroke_tia">
+        <label class="sub"><input type="checkbox" name="athero_related" data-t1only> 合併動脈硬化相關疾病或病史</label>
+      </div>
+      <label><input type="checkbox" name="pad_severe" data-t1only> 周邊動脈疾病：曾接受血管再通術、有肢體缺血相關症狀或截肢</label>
+      <label><input type="checkbox" name="imaging_stenosis_ge50" data-t1only> 影像確認 ≧50% 直徑狹窄（冠狀動脈血管攝影／冠狀動脈或周邊血管 CT／頸動脈或周邊血管超音波）</label>
+    </fieldset>
+
+    <fieldset class="sec" data-sec="HI">
+      <legend>4　高風險 <span class="lock-msg">已由較高層級判定</span></legend>
+      <label><input type="checkbox" name="dm"> 糖尿病</label>
+      <label><input type="checkbox" name="ckd_predialysis" data-t1only> 慢性腎臟病（UACR≧30 mg/g 或 eGFR&lt;60；不論依據 UACR 或 eGFR，皆須至少持續 3 個月）</label>
+      <label class="sub"><input type="checkbox" name="dialysis" data-t1only> 已進入透析（CKD 高風險條件不適用）</label>
+      <label class="auto"><input type="checkbox" id="a-ldl190" disabled> LDL-C≧190 mg/dL <span class="tag-auto">自動判定</span></label>
+      <label class="num">冠狀動脈鈣化分數 CAC（≧400 屬高風險）<input type="number" name="cac" min="0" inputmode="numeric" data-t1only></label>
+    </fieldset>
+
+    <fieldset class="sec" data-sec="RF">
+      <legend>5　心血管風險因子（中／低／0 項） <span class="lock-msg">已由較高層級判定</span></legend>
+      <label><input type="checkbox" name="htn"> 高血壓</label>
+      <label class="auto"><input type="checkbox" id="a-RF-2" disabled> 男性≧45 歲／女性≧55 歲 <span class="tag-auto" data-auto="RF-2">自動判定</span></label>
+      <p class="q">早發性冠心病家族史（男性≦55 歲、女性≦65 歲發病）：填家族中最早發病年齡</p>
+      <label class="num sub">男性親屬發病年齡<input type="number" name="fam_male_onset_age" min="0" max="120" inputmode="numeric"></label>
+      <label class="num sub">女性親屬發病年齡<input type="number" name="fam_female_onset_age" min="0" max="120" inputmode="numeric"></label>
+      <label class="auto"><input type="checkbox" id="a-RF-3" disabled> 早發性冠心病家族史 <span class="tag-auto" data-auto="RF-3">自動判定</span></label>
+      <label class="auto"><input type="checkbox" id="a-RF-4" disabled> HDL-C 偏低（男&lt;40、女&lt;50） <span class="tag-auto" data-auto="RF-4">自動判定</span></label>
+      <label><input type="checkbox" name="smoking"> 抽菸</label>
+      <label class="auto"><input type="checkbox" id="a-RF-6" disabled> 代謝症候群（下列 ≧3 項）：已符合 <b id="v-mets">0</b> 項 <span class="tag-auto" data-auto="RF-6">自動判定</span></label>
+      <div class="subs open">
+        <label class="num sub">腰圍（cm；男≧90、女≧80）<input type="number" name="waist" min="0" inputmode="decimal" data-t1only></label>
+        <div class="row sub">
+          <label class="num">收縮壓<input type="number" name="sbp" min="0" inputmode="numeric" data-t1only></label>
+          <label class="num">舒張壓<input type="number" name="dbp" min="0" inputmode="numeric" data-t1only></label>
+          <label><input type="checkbox" name="on_antihtn" data-t1only> 使用高血壓藥物</label>
+        </div>
+        <div class="row sub">
+          <label class="num">空腹血糖<input type="number" name="fpg" min="0" inputmode="numeric" data-t1only></label>
+          <label><input type="checkbox" name="on_dm_drug" data-t1only> 使用糖尿病藥物</label>
+        </div>
+        <label class="sub"><input type="checkbox" name="on_tg_drug" data-t1only> 使用治療 TG 血脂藥物（空腹 TG≧150 由上方 TG 自動判定）</label>
+        <p class="sub hint" id="v-mets-items"></p>
+      </div>
+    </fieldset>
+
+    <fieldset class="sec" data-sec="T2">
+      <legend>6　表二／降 TG 表用：心血管疾病定義</legend>
+      <label><input type="checkbox" name="t2_cvd"> 符合表二「心血管疾病定義」：冠狀動脈粥狀硬化（心絞痛且有心導管證實、缺氧性心電圖變化或負荷試驗陽性，附報告），或缺血型腦血管疾病（腦梗塞；TIA、有症狀頸動脈狹窄須神經科確立）</label>
+    </fieldset>
+
+    <fieldset class="sec" data-sec="TX">
+      <legend>7　治療情境（ezetimibe／複方）</legend>
+      <label><input type="checkbox" name="dx_primary_hc"> 診斷：原發性高膽固醇血症</label>
+      <label><input type="checkbox" name="dx_hofh"> 診斷：同型接合子家族性高膽固醇血症（HoFH）</label>
+      <label><input type="checkbox" name="dx_sitosterolemia"> 診斷：同型接合子性麥脂醇血症（植物脂醇血症）</label>
+      <label><input type="checkbox" name="statin_intolerant"> 對 statin 發生無法耐受的不良反應（如 severe myalgia、myositis）</label>
+      <label><input type="checkbox" name="statin_contraindicated"> statin 禁忌症（附表二-D：藥物過敏、活動性肝病變）</label>
+      <label class="num">目前 statin 單一治療已持續（週）<input type="number" name="statin_mono_weeks" min="0" inputmode="numeric"></label>
+      <label class="sub"><input type="checkbox" name="statin_mono_ge3m"> statin 單一治療已滿 3 個月（清單品項用）</label>
+      <div class="row">
+        <span class="lbl">擬用 ezetimibe 是否為 2.6.2 清單品項（4 個代碼）</span>
+        <label><input type="radio" name="eze_listed" value="no"> 否</label>
+        <label><input type="radio" name="eze_listed" value="yes"> 是</label>
+        <label><input type="radio" name="eze_listed" value="unsure" checked> 不確定</label>
+      </div>
+      <div class="row">
+        <span class="lbl">擬用複方是否為 2.6.3 清單品項（10 個代碼）</span>
+        <label><input type="radio" name="cmb_listed" value="no"> 否</label>
+        <label><input type="radio" name="cmb_listed" value="yes"> 是</label>
+        <label><input type="radio" name="cmb_listed" value="unsure" checked> 不確定</label>
+      </div>
+      <label><input type="checkbox" name="on_gemfibrozil"> 正在使用 gemfibrozil</label>
+      <label><input type="checkbox" name="acute_inpatient"> 急性住院中</label>
+      <label><input type="checkbox" name="fh_features"> 嚴重高膽固醇血症／肌腱黃色瘤／早發心血管疾病／家族病史</label>
+    </fieldset>
+
+    <details class="sec" data-sec="PCSK9">
+      <summary>8　PCSK9（evolocumab／alirocumab；需事前審查）</summary>
+      <label class="num">重大心血管事件
+        <select name="major_cv_event">
+          <option value="">無</option>
+          <option value="mi">心肌梗塞</option>
+          <option value="revasc">冠狀動脈或其他動脈血管再通術</option>
+          <option value="stroke">動脈硬化相關之缺血性腦中風</option>
+        </select>
+      </label>
+      <p class="hint">重大心血管事件限心肌梗塞、血管再通術、動脈硬化相關之缺血性腦中風（附表二-D 3.1）；TIA、未合併心肌梗塞之急性冠心症、單純影像狹窄不在其列。</p>
+      <div class="row" id="q14-row">
+        <span class="lbl">事件後一年內是否已開始使用最大耐受劑量 statin？（附表二-D 3.1，首次申請必要條件；statin 禁忌症／不耐受者最大耐受劑量可為零，Q20）</span>
+        <label><input type="radio" name="max_statin_within_1y" value="yes"> 是</label>
+        <label><input type="radio" name="max_statin_within_1y" value="no"> 否</label>
+      </div>
+      <p class="hint" id="q14-pathii" hidden>statin 禁忌症或不耐受（第 7 區已勾）：路徑 II 不必回答此題，視為符合（Q20）；申請時應敘明 statin 禁忌症／不耐受理由。</p>
+      <label class="num">事件日期（僅供病歷摘要，不參與判定）<input type="date" name="event_date"></label>
+      <label class="num">高強度或最大耐受 statin 已持續（月）<input type="number" name="high_or_max_statin_months" min="0" inputmode="numeric"></label>
+      <label class="num">之後合併 ezetimibe 10 mg 已持續（月）<input type="number" name="eze_add_on_months" min="0" inputmode="numeric"></label>
+      <p class="q">同合子家族性高膽固醇血症（僅 evolocumab）</p>
+      <label class="num">最高忍受劑量 statin＋ezetimibe 合併已持續（月）<input type="number" name="statin_eze_combo_months" min="0" inputmode="numeric"></label>
+      <label><input type="checkbox" name="hofh_genetic"> 基因檢測同合子／多重基因異常，且台灣 FH 建議診斷標準評分 &gt;8 分</label>
+      <p class="hint">基因未檢出時（F p.42 2.(1)II「經遺傳基因檢測未檢出同合子基因變異或多重不同基因異常之同合子家族性高膽固醇血症患者，至少須符合以下三種臨床徵狀」）：以下兩題皆「是」且臨床徵狀 ≧3 項才符合。</p>
+      <div class="row">
+        <span class="lbl">基因檢測未檢出同合子或多重基因異常？</span>
+        <label><input type="radio" name="hofh_gene_negative" value="yes"> 是</label>
+        <label><input type="radio" name="hofh_gene_negative" value="no"> 否</label>
+      </div>
+      <div class="row">
+        <span class="lbl">已確診同合子家族性高膽固醇血症？</span>
+        <label><input type="radio" name="hofh_dx_confirmed" value="yes"> 是</label>
+        <label><input type="radio" name="hofh_dx_confirmed" value="no"> 否</label>
+      </div>
+      <p class="hint">臨床徵狀（需 ≧3 項）：</p>
+      <label class="sub"><input type="checkbox" name="hofh_c1"> i. 10 歲前出現皮膚或肌腱黃色瘤</label>
+      <label class="sub"><input type="checkbox" name="hofh_c2"> ii. 未經藥物治療 LDL-C&gt;500 且治療後&gt;330 mg/dL</label>
+      <label class="sub"><input type="checkbox" name="hofh_c3"> iii. 父母有高膽固醇血症（未治療 TC&gt;250 mg/dL）</label>
+      <label class="sub"><input type="checkbox" name="hofh_c4"> iv. 20 歲前發生冠心病</label>
+    </details>
+
+    <div class="actions">
+      <button type="submit" class="btn primary">評估</button>
+      <button type="button" class="btn" id="reset">重新評估</button>
+    </div>
+  </form>
+
+  <section id="result" aria-live="polite" hidden></section>
+
+  <details class="sec" id="q-notes">
+    <summary>條文解讀說明（Q1–Q20）</summary>
+    <p class="hint">給付規定原文未明確規定、需解讀之處，本工具採下列解讀；結果卡以 Q 編號標示。實際給付以健保署審查為準。</p>
+    <ol class="qlist">
+      <li><b>Q1</b> 停經：表二「女性≧55 歲或停經者」計入危險因子；表一原文無「停經」，不計入。</li>
+      <li><b>Q2</b> 表二起始：TC 或 LDL-C 任一達起始值即符合；是否達標以 LDL-C 判定，TC 列為附註。</li>
+      <li><b>Q3</b> 不確定藥品是否為表二適用品項時，表一、表二結果並列。</li>
+      <li><b>Q4</b> 有冠狀動脈疾病或周邊動脈疾病，但不符極高風險、非常高風險所列條件時，視同未勾選，照常依高風險條件與危險因子數判定；結果卡附註此勾選未計入風險分層。</li>
+      <li><b>Q5</b> 極高風險所列「頸動脈狹窄」原文未定義程度，由臨床判定，不自動套用 50%。</li>
+      <li><b>Q6</b> 表一「0 項危險因子」比照中、低風險：先 3–6 個月生活型態改變，處方規定依中、低風險欄。</li>
+      <li><b>Q7</b> HDL-C 偏低可同時計為一項危險因子與代謝症候群的一項。</li>
+      <li><b>Q8</b> 代謝症候群的血壓條件：收縮壓≧130 或舒張壓≧85 任一即成立。</li>
+      <li><b>Q9</b> 高血壓、抽菸由醫師勾選，不由血壓數值推定。</li>
+      <li><b>Q10</b> ezetimibe／複方的「治療目標」採病人適用表（表一該風險層級或表二該列）的 LDL-C 目標。</li>
+      <li><b>Q11</b> 「statin 單一治療 6–8 週」以滿 6 週起算即可評估。</li>
+      <li><b>Q12</b> ezetimibe／複方仍須先符合表一（或表二）的起始藥物治療條件（保守解讀：公告版已刪「符合全民健康保險降血脂藥物給付規定表」字樣，第 82 次共擬會議通過版保留）。</li>
+      <li><b>Q13</b> 起始條件與「LDL-C≧190」使用開始藥物治療前的 LDL-C；是否達標、ezetimibe、PCSK9 使用目前（治療中）LDL-C。</li>
+      <li><b>Q14</b> PCSK9 首次申請的「一年內」依附表二-D 3.1「首次申請限給付於在發病後一年內開始使用最大耐受劑量statin之病人」：以事件後一年內是否已開始使用最大耐受劑量 statin 判定，不以申請日距事件月數判定；再次申請（續用）不適用此限制。statin 禁忌症或確診不耐受者（路徑 II）最大耐受劑量可為零（Q20），此題不必回答、視為符合，申請時應敘明理由。</li>
+      <li><b>Q15</b> 降三酸甘油酯藥物給付規定表的「心血管疾病」採表二的心血管疾病定義。</li>
+      <li><b>Q16</b> ezetimibe 給付依 2.6.2 專條判定；表一處方規定「或合併 ezetimibe」一併列出供參。</li>
+      <li><b>Q17</b> 高風險的「慢性腎臟病」限進入透析治療前；已透析者不適用此條件。</li>
+      <li><b>Q18</b> 缺血性中風／短暫性腦缺血發作但未合併動脈硬化相關疾病或病史時，視同未勾選（同 Q4），結果卡附註此勾選未計入風險分層。</li>
+      <li><b>Q19</b> 早發性冠心病家族史的年齡（男性≦55 歲、女性≦65 歲）含邊界值。</li>
+      <li><b>Q20</b> PCSK9 路徑 II（statin 禁忌症或確診不耐受）不要求正在使用 statin；路徑 I 仍須高強度或最大耐受 statin ≧3 個月後合併 ezetimibe ≧3 個月。總述字面另有「使用最大耐受劑量statin」，路徑 II 申請時應敘明 statin 禁忌症／不耐受理由。</li>
+    </ol>
+  </details>
+</main>
+<script type="module" src="ui.js"></script>
 </body>
 </html>

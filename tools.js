@@ -5,10 +5,11 @@ export const TOOLS = [
   {
     id: 'lipid-nhi-202609',
     name: '健保降血脂藥物評估工具',
-    description: '依健保藥品給付規定 2.6.1–2.6.3，評估降血脂藥物給付與 LDL-C 治療目標。',
+    description: '依健保藥品給付規定 2.6.1–2.6.4，評估降血脂藥物給付與 LDL-C 治療目標。',
     path: 'tools/lipid-nhi-202609/',
-    regulation: '健保藥品給付規定 2.6.1–2.6.3，115/9/1 生效',
+    regulation: '健保藥品給付規定 2.6.1–2.6.4，115/9/1 生效（依 115/10/22 版完整給付規定）',
     officialUrl: OFFICIAL_URL,
-    status: '開發中',
+    status: '可用',
+    pages: ['drugs.html'], // 工具資料夾內的其他頁（查可用藥物）
   },
 ];

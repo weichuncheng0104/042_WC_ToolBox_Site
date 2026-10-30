@@ -1,0 +1,59 @@
+/* lipid-nhi-202609 工具頁專用樣式（共用變數見 common/style.css） */
+.sec { background: var(--card); border: 1px solid var(--line); border-radius: 8px; margin: 0 0 .8rem; padding: .6rem 1rem .8rem; min-width: 0; }
+#q-notes { margin-top: 1rem; }
+.qlist { list-style: none; padding-left: 0; margin: .3rem 0; font-size: .9rem; }
+.qlist li { margin: .25rem 0; }
+.sec legend, .sec summary { font-weight: 700; padding: 0 .3rem; }
+details.sec summary { cursor: pointer; padding: .2rem 0; }
+.sec label { display: block; padding: .25rem 0; }
+.sec .row { display: flex; flex-wrap: wrap; gap: .3rem 1rem; align-items: center; padding: .2rem 0; }
+.sec .row label { display: inline-block; }
+.sec .lbl, .sec .q { font-weight: 600; margin: .3rem 0 .1rem; }
+.sec .sub { margin-left: 1.4rem; }
+.sec .hint { color: var(--muted); font-size: .85rem; margin: .2rem 0; }
+.sec label.num { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.sec input[type=number], .sec select { font: inherit; padding: .25rem .4rem; border: 1px solid var(--line); border-radius: 4px; width: 7rem; }
+.sec select { width: auto; max-width: 100%; }
+.sec input[type=checkbox], .sec input[type=radio] { width: 1.1rem; height: 1.1rem; vertical-align: -.15rem; }
+.auto { color: var(--muted); }
+.tag-auto { font-size: .72rem; background: #e3f2fd; color: #0b4f6c; border-radius: 4px; padding: 0 .35rem; white-space: nowrap; }
+.auto-line { font-size: .9rem; margin: .3rem 0 0; }
+.lock-msg { display: none; font-size: .75rem; font-weight: 600; background: #eceff1; color: var(--muted); border-radius: 4px; padding: 0 .4rem; margin-left: .3rem; }
+.sec.locked { opacity: .55; }
+.sec.locked .lock-msg { display: inline; }
+.row.off { opacity: .55; }
+.actions { display: flex; gap: .6rem; margin: 1rem 0; }
+.btn { font: inherit; font-weight: 600; padding: .6rem 1.4rem; border-radius: 6px; border: 1px solid var(--accent); background: #fff; color: var(--accent); cursor: pointer; min-height: 2.75rem; }
+.btn.primary { background: var(--accent); color: #fff; }
+#result { background: var(--card); border: 2px solid var(--accent); border-radius: 8px; padding: .6rem 1rem 1rem; }
+#result h2 { font-size: 1.2rem; margin: .3rem 0 .6rem; }
+.rblock { border-top: 1px solid var(--line); padding: .4rem 0; }
+.rblock h3 { font-size: 1rem; margin: .3rem 0; color: var(--accent); }
+.rblock p { margin: .3rem 0; }
+.items { margin: .2rem 0; padding-left: 1.2rem; }
+.items li { margin: .2rem 0; }
+.items li.emph { font-weight: 700; color: #8a1c1c; }
+.cite { display: block; color: var(--muted); font-size: .78rem; }
+.st { display: inline-block; font-size: .8rem; font-weight: 700; border-radius: 4px; padding: 0 .4rem; }
+.st-ok { background: #e6f4ea; color: #1e6b34; }
+.st-warn { background: #fff3cd; color: var(--warn); }
+.st-no { background: #fde7e9; color: #8a1c1c; }
+.st-fl { background: #ede7f6; color: #4527a0; }
+.tag-gap { font-size: .72rem; background: #fde7e9; color: #8a1c1c; border-radius: 4px; padding: 0 .35rem; }
+.tag-pre { font-size: .75rem; background: #fff3cd; color: var(--warn); border-radius: 4px; padding: 0 .35rem; }
+.drug { border-left: 3px solid var(--line); padding-left: .6rem; margin: .5rem 0; }
+.dname { margin: .2rem 0; }
+.tier b { font-size: 1.1rem; }
+.meta { color: var(--muted); font-size: .8rem; margin-top: .8rem; }
+.ref { margin: .3rem 0; font-size: .88rem; }
+.ref table { border-collapse: collapse; margin: .3rem 0; }
+.ref th, .ref td { border: 1px solid var(--line); padding: .2rem .4rem; text-align: left; vertical-align: top; }
+a.btn { display: inline-block; text-decoration: none; }
+.hint { color: var(--muted); font-size: .85rem; margin: .2rem 0; }
+.chart textarea { width: 100%; box-sizing: border-box; font: .9rem/1.4 ui-monospace, Consolas, monospace; padding: .4rem; border: 1px solid var(--line); border-radius: 4px; }
+@media (max-width: 480px) {
+  main { padding: .6rem; }
+  .sec { padding: .5rem .7rem .7rem; }
+  .sec .sub { margin-left: .8rem; }
+  .btn { flex: 1; }
+}

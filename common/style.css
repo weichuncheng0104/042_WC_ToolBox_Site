@@ -1,6 +1,6 @@
 :root { --fg: #1f2933; --muted: #52606d; --bg: #f5f7fa; --card: #fff; --accent: #0b6e99; --warn: #8a5a00; --line: #d9e2ec; }
 * { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, -apple-system, "Noto Sans TC", "Microsoft JhengHei", sans-serif; color: var(--fg); background: var(--bg); line-height: 1.6; }
+body { margin: 0; font-family: system-ui, -apple-system, "Noto Sans TC", "Microsoft JhengHei", sans-serif; color: var(--fg); background: var(--bg); line-height: 1.6; overflow-wrap: anywhere; }
 .site-header { background: var(--accent); color: #fff; padding: .6rem 1rem; display: flex; align-items: center; gap: 1rem; }
 .site-header a { color: #fff; text-decoration: none; font-weight: 600; }
 .site-header .title { opacity: .85; }
