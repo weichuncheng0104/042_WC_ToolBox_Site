@@ -19,7 +19,7 @@ export function renderHeader(root, { showHome = true } = {}) {
   document.body.prepend(el);
 }
 
-export function renderFooter({ regulation, officialUrl } = {}) {
+export function renderFooter({ regulation, officialUrl, lastUpdate } = {}) {
   const el = document.createElement('footer');
   el.className = 'site-footer';
   const p = (text) => {
@@ -29,6 +29,7 @@ export function renderFooter({ regulation, officialUrl } = {}) {
   };
   el.append(p('免責聲明：' + DISCLAIMER));
   if (regulation) el.append(p('法規版本：' + regulation));
+  if (lastUpdate) el.append(p('last_update：' + lastUpdate));
   if (officialUrl) {
     const x = document.createElement('p');
     x.append('官方公告：');

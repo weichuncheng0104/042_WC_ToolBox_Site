@@ -10,7 +10,7 @@ const back = document.createElement('a');
 back.href = 'index.html';
 back.textContent = '← 返回評估工具';
 document.querySelector('.site-header .title').before(back);
-renderFooter({ regulation: tool.regulation, officialUrl: tool.officialUrl });
+renderFooter({ regulation: tool.regulation, officialUrl: tool.officialUrl, lastUpdate: tool.lastUpdate });
 
 const $ = (id) => document.getElementById(id);
 function el(tag, cls, text) {

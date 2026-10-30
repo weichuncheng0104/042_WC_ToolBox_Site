@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>完整藥物清單（表一／表二）｜健保降血脂藥物評估工具｜看診工具箱</title>
+<link rel="stylesheet" href="../../common/style.css">
+<link rel="stylesheet" href="tool.css">
+</head>
+<body>
+<main>
+  <h1>完整藥物清單（表一／表二）</h1>
+  <div class="notice">
+    <p id="src"></p>
+    <p>收載：用藥品項檔中目前有效（有效起迄日涵蓋檔案日，且支付價 > 0）、「給付規定章節」為 2.6.1–2.6.4 的品項，加上給付規定 2.6 與公告附件1 列舉的品項。表二＝2.6.1 總則列舉（不適用表一、僅適用表二）；其餘為表一。參考查詢頁，不讀取評估工具的病人資料。</p>
+    <p id="zero-price"></p>
+  </div>
+
+  <section class="sec">
+    <label class="num">篩選（健保代碼、學名、商品名）<input type="search" id="q" autocomplete="off"></label>
+    <p class="hint" id="q-count"></p>
+  </section>
+
+  <section class="sec" id="table1" data-list></section>
+  <section class="sec" id="table2" data-list></section>
+  <section class="sec" id="unclassified" data-list></section>
+</main>
+<script type="module" src="drug_list_page.js"></script>
+</body>
+</html>

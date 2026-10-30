@@ -1,4 +1,4 @@
-// 病歷用純文字摘要：chartSummary(evaluate() 的結果) → 純文字，每行一項。
+// 病歷用純文字摘要：chartSummary(evaluate() 的結果, 'YYYY-MM-DD') → 純文字，每行一項。
 // 純函式：只讀引擎輸出的結構化結果，不抓 DOM、不含病人識別資料。台灣病歷慣例以英文縮寫為主。
 
 const HEADER = '[NHI lipid criteria 2.6 (eff. 2026/09/01)]';
@@ -130,10 +130,18 @@ function ezeLine(d) {
   return `Ezetimibe (2.6.2): ${ST[d.status]}${why ? ` (${why})` : ''}`;
 }
 
-export function chartSummary(r) {
+// 本機時間的 YYYY-MM-DD（貼回病歷的日期）
+export function localDate(d = new Date()) {
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+// date：呼叫端傳入的 YYYY-MM-DD（UI 以 localDate() 於顯示與複製時各取一次，跨日複製仍為當天）
+export function chartSummary(r, date) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date ?? '')) throw new Error(`摘要日期須為 YYYY-MM-DD：${date}`);
   const x = r.input;
   const scope = x.table_choice === 'yes' ? ' 表二品項' : x.table_choice === 'unsure' ? ' 品項未確定，表一／表二並列' : '';
-  const L = [`${HEADER}${scope}`, ptLine(x), condLine(x)];
+  const L = [`${HEADER} ${date}${scope}`, ptLine(x), condLine(x)];
   if (r.table1) L.push(...table1Lines(r.table1));
   if (r.table2) L.push(...table2Lines(r.table2));
   const tx = txLine(x);

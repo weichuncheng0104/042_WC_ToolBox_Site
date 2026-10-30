@@ -51,6 +51,12 @@ details.sec summary { cursor: pointer; padding: .2rem 0; }
 .ref th, .ref td { border: 1px solid var(--line); padding: .2rem .4rem; text-align: left; vertical-align: top; }
 a.btn { display: inline-block; text-decoration: none; }
 .hint { color: var(--muted); font-size: .85rem; margin: .2rem 0; }
+.dl-wrap { overflow-x: auto; }
+.dl { border-collapse: collapse; width: 100%; font-size: .85rem; }
+.dl th, .dl td { border: 1px solid var(--line); padding: .2rem .4rem; text-align: left; vertical-align: top; }
+.dl th.grp { background: #e3f2fd; color: #0b4f6c; }
+.dl td.code { font-family: ui-monospace, Consolas, monospace; white-space: nowrap; }
+.dl .mk { display: block; }
 .chart textarea { width: 100%; box-sizing: border-box; font: .9rem/1.4 ui-monospace, Consolas, monospace; padding: .4rem; border: 1px solid var(--line); border-radius: 4px; }
 @media (max-width: 480px) {
   main { padding: .6rem; }

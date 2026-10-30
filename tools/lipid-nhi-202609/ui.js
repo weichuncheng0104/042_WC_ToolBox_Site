@@ -3,14 +3,14 @@ import { TOOLS } from '../../tools.js';
 import { renderHeader, renderFooter } from '../../common/layout.js';
 import { evaluate } from './engine.js';
 import { lookupDrug, infoOf, NOT_FOUND_TEXT, COVERAGE_NOTE } from './drug_lookup.js';
-import { chartSummary } from './summary.js';
+import { chartSummary, localDate } from './summary.js';
 import { clearRadios, linkHofh } from './tristate.js';
 import { readFields, resetFields, syncMeno, syncDisabled } from './form_state.js';
 
 const tool = TOOLS.find((t) => t.id === 'lipid-nhi-202609');
 document.getElementById('tool-name').textContent = tool.name;
 renderHeader('../../');
-renderFooter({ regulation: tool.regulation, officialUrl: tool.officialUrl });
+renderFooter({ regulation: tool.regulation, officialUrl: tool.officialUrl, lastUpdate: tool.lastUpdate });
 
 const form = document.getElementById('f');
 const out = document.getElementById('result');
@@ -198,12 +198,13 @@ function renderChart(r) {
   b.classList.add('chart');
   const ta = el('textarea');
   ta.readOnly = true;
-  ta.value = chartSummary(r);
+  ta.value = chartSummary(r, localDate());
   ta.rows = ta.value.split('\n').length + 1;
   const btn = el('button', 'btn', '複製');
   btn.type = 'button';
   const msg = el('span', 'hint');
   btn.addEventListener('click', async () => {
+    ta.value = chartSummary(r, localDate());
     try {
       await navigator.clipboard.writeText(ta.value);
       msg.textContent = '已複製';
