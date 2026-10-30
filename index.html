@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>看診工具箱</title>
+<link rel="stylesheet" href="common/style.css">
+</head>
+<body>
+<main>
+  <h1>看診工具箱</h1>
+  <nav class="tool-list" id="tool-list" aria-label="工具目錄"></nav>
+</main>
+<script type="module">
+import { TOOLS } from './tools.js';
+import { renderHeader, renderFooter } from './common/layout.js';
+
+renderHeader('./', { showHome: false });
+const list = document.getElementById('tool-list');
+for (const t of TOOLS) {
+  const a = document.createElement('a');
+  a.className = 'tool-btn';
+  a.href = t.path + 'index.html';
+  const name = document.createElement('div');
+  name.className = 'name';
+  name.textContent = t.name;
+  if (t.status !== '上線') {
+    const b = document.createElement('span');
+    b.className = 'badge';
+    b.textContent = t.status;
+    name.append(b);
+  }
+  const desc = document.createElement('div');
+  desc.className = 'desc';
+  desc.textContent = t.description;
+  a.append(name, desc);
+  list.append(a);
+}
+renderFooter();
+</script>
+</body>
+</html>
