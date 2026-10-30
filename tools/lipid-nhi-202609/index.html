@@ -18,9 +18,9 @@
     <fieldset class="sec" data-sec="SCOPE">
       <legend>0　適用表</legend>
       <p class="q">預計／目前使用的降膽固醇藥品，是否為「2.6.1 總則所列表二適用品項」？</p>
-      <label><input type="radio" name="table_choice" value="no" checked> 否（適用表一）</label>
+      <label><input type="radio" name="table_choice" value="no"> 否（適用表一）</label>
       <label><input type="radio" name="table_choice" value="yes"> 是（僅適用表二）</label>
-      <label><input type="radio" name="table_choice" value="unsure"> 不確定（表一、表二並列）</label>
+      <label><input type="radio" name="table_choice" value="unsure" checked> 不確定（表一、表二並列）</label>
       <div class="drug-q">
         <label class="num">藥品查詢（健保代碼 10 碼，或藥名／成分部分字串）<input type="search" id="drug-q" autocomplete="off"></label>
         <button type="button" id="drug-q-btn">查詢</button>
@@ -37,7 +37,7 @@
         <label><input type="radio" name="sex" value="F"> 女</label>
       </div>
       <label class="num">年齡（歲）<input type="number" name="age" min="0" max="120" inputmode="numeric"></label>
-      <label class="sub" id="meno-wrap" hidden><input type="checkbox" name="postmenopausal"> 已停經（僅表二計入）</label>
+      <label class="sub" id="meno-wrap"><input type="checkbox" name="postmenopausal"> 已停經（僅表二計入） <span class="hint">僅女性適用</span></label>
       <label class="num">開始藥物治療前 LDL-C（基線，mg/dL）<input type="number" name="ldl" min="0" inputmode="decimal"></label>
       <label class="num">目前 LDL-C（治療中，mg/dL；已用藥才填）<input type="number" name="ldl_current" min="0" inputmode="decimal"></label>
       <label class="num">HDL-C（mg/dL）<input type="number" name="hdl" min="0" inputmode="decimal"></label>

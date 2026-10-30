@@ -5,6 +5,7 @@ import { evaluate } from './engine.js';
 import { lookupDrug, infoOf, NOT_FOUND_TEXT, COVERAGE_NOTE } from './drug_lookup.js';
 import { chartSummary } from './summary.js';
 import { clearRadios, linkHofh } from './tristate.js';
+import { readFields, resetFields, syncMeno, syncDisabled } from './form_state.js';
 
 const tool = TOOLS.find((t) => t.id === 'lipid-nhi-202609');
 document.getElementById('tool-name').textContent = tool.name;
@@ -15,16 +16,7 @@ const form = document.getElementById('f');
 const out = document.getElementById('result');
 const $ = (id) => document.getElementById(id);
 
-function readForm() {
-  const x = {};
-  for (const el of form.elements) {
-    if (!el.name) continue;
-    if (el.type === 'checkbox') x[el.name] = el.checked;
-    else if (el.type === 'radio') { if (el.checked) x[el.name] = el.value; }
-    else x[el.name] = el.value === '' ? null : el.value;
-  }
-  return x;
-}
+const readForm = () => readFields(form);
 
 // ── 即時：自動判定欄位、子項展開、較高層級鎖定 ──
 function setAuto(id, met) {
@@ -37,14 +29,9 @@ function setAuto(id, met) {
 }
 
 function refresh() {
+  syncMeno(form, readForm().sex);
   const x = readForm();
-  $('meno-wrap').hidden = x.sex !== 'F';
   for (const d of form.querySelectorAll('.subs[data-parent]')) d.hidden = !x[d.dataset.parent];
-  // Q14 路徑 II：statin 禁忌症／不耐受 → 此題不必回答（引擎同樣忽略），停用並註明
-  const pathII = x.statin_intolerant || x.statin_contraindicated;
-  for (const r of form.querySelectorAll('input[name="max_statin_within_1y"], button[data-clear="max_statin_within_1y"]')) r.disabled = pathII;
-  $('q14-row').classList.toggle('off', pathII);
-  $('q14-pathii').hidden = !pathII;
 
   const r = evaluate(x);
   const tc = Number(x.tc), hdl = Number(x.hdl);
@@ -60,12 +47,11 @@ function refresh() {
     $('v-mets-items').textContent = t1.mets.items.map((m) => `${m.ruleId} ${m.met === true ? '✓' : m.met === null ? '?' : '✗'}`).join('　');
   }
   const locked = t1 ? t1.lockedSections : [];
-  for (const fs of form.querySelectorAll('fieldset[data-sec]')) {
-    const on = locked.includes(fs.dataset.sec);
-    fs.classList.toggle('locked', on);
-    // 只停用表一專用欄位；表二／降 TG／ezetimibe 仍會用到的欄位保持可填
-    for (const el of fs.querySelectorAll('[data-t1only]')) el.disabled = on;
-  }
+  for (const fs of form.querySelectorAll('fieldset[data-sec]')) fs.classList.toggle('locked', locked.includes(fs.dataset.sec));
+  // Q14 路徑 II：statin 禁忌症／不耐受 → 此題不必回答，停用並註明
+  const pathII = syncDisabled(form, x, locked);
+  $('q14-row').classList.toggle('off', pathII);
+  $('q14-pathii').hidden = !pathII;
 }
 
 // ── 結果卡 ──
@@ -303,13 +289,15 @@ form.addEventListener('submit', (ev) => {
   ev.preventDefault();
   render(evaluate(readForm()));
 });
-$('reset').addEventListener('click', () => {
-  form.reset();
+// 「重新評估」：整份表單回到初始狀態（所有欄位、藥品查詢結果、HoFH 連動、結果卡與病歷摘要），再重算停用狀態
+function resetAll() {
+  resetFields(form);
   hofhAuto = false;
   $('drug-q-out').replaceChildren();
   out.replaceChildren();
   out.hidden = true;
   refresh();
   window.scrollTo({ top: 0 });
-});
+}
+$('reset').addEventListener('click', resetAll);
 refresh();

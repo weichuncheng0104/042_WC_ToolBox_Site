@@ -53,6 +53,8 @@ function normalize(raw) {
     'fam_male_onset_age', 'fam_female_onset_age', 'statin_mono_weeks',
     'high_or_max_statin_months', 'eze_add_on_months', 'statin_eze_combo_months']) x[k] = num(raw[k]);
   x.sex = raw.sex === 'M' || raw.sex === 'F' ? raw.sex : null;
+  // 停經僅女性適用（S11）：男性一律視為未停經
+  if (x.sex === 'M') x.postmenopausal = false;
   // 事件日期只供病歷摘要，不參與判定（Q14）
   x.event_date = typeof raw.event_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(raw.event_date) ? raw.event_date : null;
   delete x.months_since_event;
