@@ -2,6 +2,7 @@
 // 只顯示，不讀也不寫評估工具的病人資料；不載入外部資源。
 import { TOOLS } from '../../tools.js';
 import { renderHeader, renderFooter } from '../../common/layout.js';
+import { renderPendingNotice } from '../../common/pending.js';
 import { DRUG_LIST } from './drug_list.js';
 import { sourceLine, grouped, matches, MARK_LABEL, sections, zeroPriceNote } from './drug_list_view.js';
 
@@ -12,6 +13,7 @@ back.href = 'index.html';
 back.textContent = '← 返回評估工具';
 document.querySelector('.site-header .title').before(back);
 renderFooter({ regulation: tool.regulation, officialUrl: tool.officialUrl, lastUpdate: tool.lastUpdate });
+renderPendingNotice(tool);
 
 const $ = (id) => document.getElementById(id);
 function el(tag, cls, text) {

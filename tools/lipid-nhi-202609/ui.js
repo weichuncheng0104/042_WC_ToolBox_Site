@@ -1,6 +1,7 @@
 // 點選 UI：讀表單 → engine.evaluate() → 顯示。病人資料只在頁面記憶體，不寫 localStorage／cookie、不送出。
 import { TOOLS } from '../../tools.js';
 import { renderHeader, renderFooter } from '../../common/layout.js';
+import { renderPendingNotice } from '../../common/pending.js';
 import { evaluate } from './engine.js';
 import { lookupDrug, infoOf, NOT_FOUND_TEXT, COVERAGE_NOTE } from './drug_lookup.js';
 import { chartSummary, localDate } from './summary.js';
@@ -11,6 +12,7 @@ const tool = TOOLS.find((t) => t.id === 'lipid-nhi-202609');
 document.getElementById('tool-name').textContent = tool.name;
 renderHeader('../../');
 renderFooter({ regulation: tool.regulation, officialUrl: tool.officialUrl, lastUpdate: tool.lastUpdate });
+renderPendingNotice(tool);
 
 const form = document.getElementById('f');
 const out = document.getElementById('result');

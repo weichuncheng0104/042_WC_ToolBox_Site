@@ -1,6 +1,7 @@
 // 「查可用藥物」獨立頁：statin 強度參考表＋給付規定 2.6 藥品查詢。只顯示類別與出處，不讀也不寫評估工具的病人資料。
 import { TOOLS } from '../../tools.js';
 import { renderHeader, renderFooter } from '../../common/layout.js';
+import { renderPendingNotice } from '../../common/pending.js';
 import { lookupDrug, infoOf, NOT_FOUND_TEXT, COVERAGE_NOTE } from './drug_lookup.js';
 import { STATIN_INTENSITY } from './statin_intensity.js';
 
@@ -11,6 +12,7 @@ back.href = 'index.html';
 back.textContent = '← 返回評估工具';
 document.querySelector('.site-header .title').before(back);
 renderFooter({ regulation: tool.regulation, officialUrl: tool.officialUrl, lastUpdate: tool.lastUpdate });
+renderPendingNotice(tool);
 
 const $ = (id) => document.getElementById(id);
 function el(tag, cls, text) {
