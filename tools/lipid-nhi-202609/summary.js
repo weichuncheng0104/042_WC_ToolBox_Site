@@ -1,5 +1,6 @@
 // 病歷用純文字摘要：chartSummary(evaluate() 的結果, 'YYYY-MM-DD') → 純文字，每行一項。
 // 純函式：只讀引擎輸出的結構化結果，不抓 DOM、不含病人識別資料。台灣病歷慣例以英文縮寫為主。
+import { RECENT_LIPID_NOTE, firstC10Text, basisLine, ldlLine } from './nhi_import_rules.js';
 
 const HEADER = '[NHI lipid criteria 2.6 (eff. 2026/09/01)]';
 
@@ -130,6 +131,27 @@ function ezeLine(d) {
   return `Ezetimibe (2.6.2): ${ST[d.status]}${why ? ` (${why})` : ''}`;
 }
 
+// 健保雲端帶入的降脂用藥（nhi_import_rules.js lipidMeds()）：一品項一行；只在有帶入資料時呼叫（S25）
+function medsLines(m) {
+  const head = `Lipid-lowering Rx (NHI cloud, captured ${m.ref})`;
+  if (!m.current.length && !m.previous.length) return [`${head}: none (ATC C10) in data window`];
+  const one = (tag, x) => {
+    const dose = [x.strength, x.fre, x.qty && `qty ${x.qty}`, x.days && `x${x.days}d`].filter(Boolean).join(' ');
+    return `- ${tag} ${x.date}: ${[x.ing, `${x.name || '?'} (${x.code})`, dose, x.listing.label].filter(Boolean).join(' | ')}`;
+  };
+  return [`${head}:`, ...m.current.map((x) => one('current', x)), ...m.previous.map((x) => one('prev', x))];
+}
+
+// S27：有帶入資料時置於摘要最上方——提示（有現有降脂用藥）→ 降脂用藥 → 判讀所用資料（一欄一行＋LDL-C 歷次）
+function basisLines(b) {
+  const L = b.recent ? [RECENT_LIPID_NOTE] : [];
+  L.push(...medsLines(b.meds), `判讀所用資料（健保雲端帶入，擷取日 ${b.ref}）：`);
+  if (!b.used.length) L.push('- 無帶入欄位');
+  for (const u of b.used) L.push(`- ${basisLine(u)}`);
+  L.push(`- LDL-C 歷次：${ldlLine(b.ldl)}；${firstC10Text(b.firstC10)}`);
+  return L;
+}
+
 // 本機時間的 YYYY-MM-DD（貼回病歷的日期）
 export function localDate(d = new Date()) {
   const p = (n) => String(n).padStart(2, '0');
@@ -137,11 +159,13 @@ export function localDate(d = new Date()) {
 }
 
 // date：呼叫端傳入的 YYYY-MM-DD（UI 只在按「評估」產生摘要時以 localDate() 取一次；「複製」照抄 textarea，不重產）
-export function chartSummary(r, date) {
+// basis：健保雲端帶入的判讀所用資料（nhi_import_rules.js importBasis()；無帶入 → null，摘要與手動流程相同）
+export function chartSummary(r, date, basis = null) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date ?? '')) throw new Error(`摘要日期須為 YYYY-MM-DD：${date}`);
   const x = r.input;
   const scope = x.table_choice === 'yes' ? ' 表二品項' : x.table_choice === 'unsure' ? ' 品項未確定，表一／表二並列' : '';
-  const L = [`${HEADER} ${date}${scope}`, ptLine(x), condLine(x)];
+  const L = basis ? basisLines(basis) : [];
+  L.push(`${HEADER} ${date}${scope}`, ptLine(x), condLine(x));
   if (r.table1) L.push(...table1Lines(r.table1));
   if (r.table2) L.push(...table2Lines(r.table2));
   const tx = txLine(x);

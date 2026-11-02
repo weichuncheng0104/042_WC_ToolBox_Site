@@ -6,7 +6,9 @@ import { evaluate } from './engine.js';
 import { lookupDrug, infoOf, NOT_FOUND_TEXT, COVERAGE_NOTE } from './drug_lookup.js';
 import { chartSummary, localDate } from './summary.js';
 import { clearRadios, linkHofh } from './tristate.js';
-import { readFields, resetFields, syncMeno, syncDisabled } from './form_state.js';
+import { readFields, resetFields, syncMeno, syncDisabled, displayValue } from './form_state.js';
+import { importedData, medsBlock, basisBlock } from './nhi_meds_view.js';
+import { importBasis, RECENT_LIPID_NOTE } from './nhi_import_rules.js';
 
 const tool = TOOLS.find((t) => t.id === 'lipid-nhi-202609');
 document.getElementById('tool-name').textContent = tool.name;
@@ -127,6 +129,14 @@ function render(r) {
   out.replaceChildren();
   out.hidden = false;
   out.append(el('h2', '', '評估結果'));
+  // 健保雲端 .json 帶入（只在有帶入時顯示，置於最上方）：S27 提示 → S25 降脂用藥 → S27 判讀所用資料
+  const data = importedData();
+  const basis = data && importBasis(data, readForm(), (f, v) => displayValue(form, f, v));
+  if (basis) {
+    if (basis.recent) out.append(el('p', 'notice', RECENT_LIPID_NOTE));
+    block('病人降血脂用藥（健保雲端帶入）').append(medsBlock(basis.meds, r.input.table_choice));
+    block('判讀所用資料（健保雲端帶入）').append(basisBlock(basis));
+  }
   block('適用表').append(list(r.scope));
 
   const t1 = r.table1;
@@ -190,17 +200,17 @@ function render(r) {
   }
 
   out.append(el('p', 'meta', `${r.meta.regulation}｜${r.meta.effective}｜${r.meta.snapshot}。出處 F＝健保署完整給付規定 PDF 頁碼。`));
-  renderChart(r);
+  renderChart(r, basis);
   out.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // 病歷用純文字摘要：只在本機剪貼簿，不送出。日期只在按「評估」時取當下本機日期；「複製」照抄 textarea，不重產
-function renderChart(r) {
+function renderChart(r, basis) {
   const b = block('病歷用摘要（純文字，可貼回病歷）');
   b.classList.add('chart');
   const ta = el('textarea');
   ta.readOnly = true;
-  ta.value = chartSummary(r, localDate());
+  ta.value = chartSummary(r, localDate(), basis);
   ta.rows = ta.value.split('\n').length + 1;
   const btn = el('button', 'btn', '複製');
   btn.type = 'button';

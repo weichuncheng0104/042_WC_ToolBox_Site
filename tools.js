@@ -20,7 +20,7 @@ export const TOOLS = [
     regulation: '健保藥品給付規定 2.6.1–2.6.4，115/9/1 生效（依 115/10/22 版完整給付規定）',
     officialUrl: OFFICIAL_URL,
     status: '上線', // 首頁不渲染狀態標籤
-    lastUpdate: '2026-10-31',
+    lastUpdate: '2026-11-02',
     pages: ['drugs.html', 'drug_list.html'], // 工具資料夾內的其他頁（查可用藥物、完整藥物清單）
     pending: [
       {

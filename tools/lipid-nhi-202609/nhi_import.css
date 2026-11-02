@@ -1,0 +1,29 @@
+/* 健保雲端 .json 帶入（S22）樣式；共用變數見 common/style.css */
+.nhi-toggle { margin-left: auto; font: inherit; font-size: .85rem; font-weight: 600; padding: .3rem .8rem; border: 1px solid #fff; border-radius: 6px; background: transparent; color: #fff; cursor: pointer; white-space: nowrap; }
+.nhi-toggle[aria-expanded="true"] { background: #fff; color: var(--accent); }
+.nhi-panel { background: var(--card); border: 2px dashed var(--accent); border-radius: 8px; padding: .6rem 1rem .8rem; margin: 0 0 1rem; }
+.nhi-panel h2 { font-size: 1.1rem; margin: .2rem 0 .4rem; }
+.nhi-privacy { font-weight: 600; color: #1e6b34; margin: .2rem 0 .5rem; }
+.nhi-drop { display: block; border: 2px dashed var(--line); border-radius: 6px; padding: 1rem; text-align: center; cursor: pointer; color: var(--muted); }
+.nhi-drop.over { border-color: var(--accent); background: #e3f2fd; }
+.nhi-drop input { display: block; margin: .5rem auto 0; max-width: 100%; }
+.nhi-list { list-style: none; padding-left: 0; margin: .4rem 0; }
+.nhi-item { border-left: 3px solid var(--line); padding: .2rem 0 .2rem .6rem; margin: .4rem 0; }
+.nhi-item.st-conflict { border-left-color: #c62828; }
+.nhi-item.st-same { opacity: .7; }
+.nhi-head { display: block; }
+.nhi-head input { width: 1.1rem; height: 1.1rem; vertical-align: -.15rem; }
+.nhi-val { font-weight: 700; color: var(--accent); }
+.nhi-conflict { display: block; color: #8a1c1c; font-size: .85rem; font-weight: 600; }
+.nhi-sub { font-weight: 700; margin: .6rem 0 .2rem; }
+.nhi-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin: .6rem 0 0; }
+.nhi-panel .emph { font-weight: 700; color: #8a1c1c; }
+/* S25 降脂用藥表（預覽與評估結果共用） */
+.nhi-medsblock { overflow-x: auto; }
+.nhi-meds { border-collapse: collapse; font-size: .85rem; margin: .2rem 0 .4rem; }
+.nhi-meds th, .nhi-meds td { border: 1px solid var(--line); padding: .2rem .4rem; text-align: left; vertical-align: top; }
+.nhi-meds th { background: #eef3f8; white-space: nowrap; }
+@media (max-width: 480px) {
+  .nhi-panel { padding: .5rem .7rem .7rem; }
+  .nhi-actions .btn { flex: 1; }
+}

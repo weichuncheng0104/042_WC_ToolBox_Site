@@ -11,6 +11,17 @@ export function readFields(form) {
   return x;
 }
 
+// 欄位值的顯示文字：radio 取選項文字、select 取選項文字、勾選框顯示「勾選」（帶入預覽與判讀所用資料共用）
+export function displayValue(form, field, value) {
+  if (value === true) return '勾選';
+  if (value === false || value === null || value === undefined || value === '') return '（未填）';
+  const r = form.querySelector(`input[type="radio"][name="${field}"][value="${value}"]`);
+  if (r) return r.parentElement.textContent.trim();
+  const s = form.querySelector(`select[name="${field}"]`);
+  if (s) { const o = [...s.options].find((op) => op.value === value); if (o) return o.textContent.trim(); }
+  return String(value);
+}
+
 // 表單內每個 input／select／textarea 回到 HTML 預設值（不依賴 form.reset()：表單內 id="reset" 的按鈕會蓋掉該方法）。
 // 停用狀態不在此處理：一律由 syncMeno／syncDisabled 依欄位值重算（refresh()）
 export function resetFields(root) {
