@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>看診工具箱</title>
+<link rel="stylesheet" href="common/style.css">
+</head>
+<body>
+<main>
+  <h1>看診工具箱</h1>
+  <nav class="tool-list" id="tool-list" aria-label="工具目錄"></nav>
+</main>
+<script type="module">
+import { TOOLS } from './tools.js';
+import { renderHeader, renderFooter } from './common/layout.js';
+import { renderToolList } from './common/catalog.js';
+
+renderHeader('./', { showHome: false });
+renderToolList(document.getElementById('tool-list'), TOOLS);
+renderFooter();
+</script>
+</body>
+</html>
