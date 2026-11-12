@@ -67,6 +67,6 @@ export const TOOLS = [
     regulation: 'USMSTF 2020（Gupta S, et al. Am J Gastroenterol 2020;115:415-434）定義；不輸出追蹤間隔',
     officialUrl: 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7393611/',
     status: '上線',
-    lastUpdate: '2026-11-11',
+    lastUpdate: '2026-11-12',
   },
 ];
