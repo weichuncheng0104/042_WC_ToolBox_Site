@@ -1,8 +1,10 @@
-// 健保雲端 .json 上傳 → 帶入預覽 → 勾選確認後寫入表單（S22）。
+// 健保雲端 .json 上傳 → 帶入預覽 → 勾選確認後寫入表單（S22）。成大三個月資料摘要 .pdf 走同一個上傳區（pdf_import.js；只帶檢驗、性別、年齡）。
 // 檔案只在本機瀏覽器解析：不發網路請求、不寫任何儲存；解析後只保留帶入建議，原始檔內容不保留、不顯示。
 // 已手動填過（非預設值）的欄位不覆蓋；寫入後觸發表單 change，由 ui.js 照常重算。
 import { parseText } from './nhi_import.js';
-import { buildProposals, importedState, planApply, planClear, planSwitch, switchText, FIELD_LABEL } from './nhi_import_rules.js';
+import { toBundle, buildPdfProposals } from './pdf_import.js';
+import { readNckuhPdf } from '../../common/nckuh_pdf_load.js';
+import { buildProposals, importedState, planApply, planClear, planSwitch, switchText, initiallyChecked, FIELD_LABEL } from './nhi_import_rules.js';
 import { readFields, displayValue } from './form_state.js';
 import { setImported, importedMeds, medsBlock } from './nhi_meds_view.js';
 import { linkRefs } from './ref_links.js';
@@ -53,7 +55,7 @@ function resetField(field) {
 const display = (field, value) => displayValue(form, field, value);
 
 // ── 版面：右上角按鈕＋上傳區 ──
-const btn = el('button', 'nhi-toggle', '.json 上傳');
+const btn = el('button', 'nhi-toggle', '.json／.pdf 上傳');
 btn.type = 'button';
 btn.setAttribute('aria-expanded', 'false');
 btn.setAttribute('aria-controls', 'nhi-panel');
@@ -62,13 +64,13 @@ btn.setAttribute('aria-controls', 'nhi-panel');
 const panel = el('section', 'nhi-panel');
 panel.id = 'nhi-panel';
 panel.hidden = true;
-panel.append(el('h2', '', '健保雲端資料 .json 帶入'));
-panel.append(el('p', 'nhi-privacy', '檔案只在本機瀏覽器解析，不會上傳、不會儲存。請上傳 032 健保雲端書籤（nhi-harvest/3）擷取的 .json。'));
+panel.append(el('h2', '', '健保雲端 .json／成大三個月 PDF 帶入'));
+panel.append(el('p', 'nhi-privacy', '檔案只在本機瀏覽器解析，不會上傳、不會儲存。請上傳 032 健保雲端書籤（nhi-harvest/3）擷取的 .json，或成大「三個月資料摘要」.pdf（只帶檢驗值、性別、年齡；頁首姓名、病歷號不帶入）。'));
 const drop = el('label', 'nhi-drop');
 const input = el('input');
 input.type = 'file';
-input.accept = '.json,application/json';
-drop.append(el('span', '', '拖放 .json 到此，或點此選擇檔案'), input);
+input.accept = '.json,application/json,.pdf,application/pdf';
+drop.append(el('span', '', '拖放 .json 或 .pdf 到此，或點此選擇檔案'), input);
 const status = el('div', 'nhi-status');
 status.setAttribute('aria-live', 'polite');
 const preview = el('div', 'nhi-preview');
@@ -111,7 +113,7 @@ function renderPreview() {
     const cb = el('input');
     cb.type = 'checkbox';
     cb.dataset.field = it.field;
-    cb.checked = it.status === 'apply';
+    cb.checked = initiallyChecked(it);
     cb.disabled = it.status !== 'apply';
     lab.append(cb, ' ', el('b', '', FIELD_LABEL[it.field] || it.field), ' → ', el('span', 'nhi-val', display(it.field, it.value)), ' ');
     lab.append(el('span', it.kind === 'direct' ? 'tag-auto' : 'tag-pre', it.kind === 'direct' ? '直接' : '推算建議'));
@@ -129,7 +131,9 @@ function renderPreview() {
     for (const x of proposals.info) ui.append(el('li', '', `${x.label}：${x.text}`));
     preview.append(ui);
   }
-  preview.append(el('p', 'hint', '推算建議只是依健保雲端資料的規則推算，請逐項確認；資料窗有限（用藥約 6 個月、檢驗約 1 年），較早的病史看不到。statin 不耐受／禁忌症、抽菸、家族史等請手動填寫。'));
+  preview.append(el('p', 'hint', proposals.source === 'pdf'
+    ? 'PDF 只帶檢驗值、性別、年齡，資料窗約 3 個月；用藥、診斷、statin 不耐受／禁忌症、抽菸、家族史等請手動填寫。'
+    : '推算建議只是依健保雲端資料的規則推算，請逐項確認；資料窗有限（用藥約 6 個月、檢驗約 1 年），較早的病史看不到。statin 不耐受／禁忌症、抽菸、家族史等請手動填寫。'));
   linkRefs(preview);
   syncButtons();
 }
@@ -158,14 +162,17 @@ async function take(file) {
   const my = ++gen;
   status.replaceChildren();
   if (file.size > MAX_BYTES) { input.value = ''; status.append(el('p', 'emph', '檔案過大（上限 30 MB）；表單未變動，帶入預覽已清除。')); dropPreview(); return; }
+  const isPdf = /\.pdf$/i.test(file.name || '') || file.type === 'application/pdf';
+  if (isPdf) status.append(el('p', '', 'PDF 解析中（在本機瀏覽器解析，不上傳）…'));
   let r;
   try {
-    r = parseText(await file.text());
+    r = isPdf ? toBundle(await readNckuhPdf(file)) : parseText(await file.text());
   } catch {
     r = { ok: false, error: '無法讀取檔案。' };
   }
   if (my !== gen) return; // 讀檔期間已換檔／清除／清空重評 → 丟棄
   input.value = '';
+  status.replaceChildren();
   if (!r.ok) { status.append(el('p', 'emph', `${r.error}（表單未變動，帶入預覽已清除。）`)); dropPreview(); return; }
   const sw = planSwitch(imported, readFields(form), readDefaults());
   for (const f of sw.clear) resetField(f);
@@ -178,8 +185,9 @@ async function take(file) {
   const note = switchText(sw);
   switchMsg.textContent = note || '';
   switchNote.hidden = !note;
-  proposals = { ...buildProposals(r), warnings: r.warnings };
-  status.append(el('p', '', `解析完成（擷取日 ${r.ref}；讀取 ${r.counts.rows} 列，重複 ${r.counts.dupRows} 列已略過）。${sw.clear.length ? `前一檔帶入的 ${sw.clear.length} 個欄位已清除。` : ''}勾選要帶入的項目後按「帶入勾選項目」。`));
+  proposals = { ...(isPdf ? buildPdfProposals(r) : buildProposals(r)), warnings: r.warnings };
+  const head = isPdf ? `解析完成（成大三個月 PDF，資料窗迄日 ${r.ref}；檢驗 ${r.counts.rows} 筆）。` : `解析完成（擷取日 ${r.ref}；讀取 ${r.counts.rows} 列，重複 ${r.counts.dupRows} 列已略過）。`;
+  status.append(el('p', '', `${head}${sw.clear.length ? `前一檔帶入的 ${sw.clear.length} 個欄位已清除。` : ''}勾選要帶入的項目後按「帶入勾選項目」。`));
   renderPreview();
 }
 

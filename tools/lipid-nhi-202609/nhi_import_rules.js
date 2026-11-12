@@ -143,7 +143,8 @@ export function recentLipidRx(p) {
 }
 
 // S27：LDL-C 歷次附註（摘要與結果卡共用）
-export const firstC10Text = (d, recent = false) => (d ? `資料內第一張降血脂藥處方 ${d}，基線取其前最近一筆${recent ? '；現用藥：起始判定取基線與 6 個月內最高之高值' : ''}` : '資料內無降血脂藥處方，基線取最近一筆');
+// source＝'pdf'（成大三個月 PDF，無用藥資料）時不談處方
+export const firstC10Text = (d, recent = false, source = 'nhi') => (source === 'pdf' ? 'PDF 無用藥資料，無法判斷哪一筆是用藥前基線' : d ? `資料內第一張降血脂藥處方 ${d}，基線取其前最近一筆${recent ? '；現用藥：起始判定取基線與 6 個月內最高之高值' : ''}` : '資料內無降血脂藥處方，基線取最近一筆');
 
 // S30 現用藥起始判定值：擷取日前 180 天內（含邊界）最高可用值；同日不同值的日期不採用（S31）
 function peak6m(p, key) {
@@ -154,7 +155,9 @@ function peak6m(p, key) {
 }
 
 // 帶入狀態（單一出口）：proposals＝buildProposals() 結果、items＝實際帶入的建議
-export const importedState = ({ meds, recent, ldl, firstC10, ref, labProblems }, items) => ({ meds, recent, ldl, firstC10, ref, labProblems, items });
+export const importedState = ({ meds, recent, ldl, firstC10, ref, labProblems, source = 'nhi' }, items) => ({ meds, recent, ldl, firstC10, ref, labProblems, source, items });
+// 帶入來源名稱（結果卡標題、病歷用摘要）
+export const sourceLabel = (d) => (d && d.source === 'pdf' ? '成大三個月 PDF 帶入' : '健保雲端帶入');
 
 // S31 問題列表（結果區與摘要最上方共用）：欄位、日期、原始值、改用的值、建議補的欄位
 const FIX_FIELD = { ldl: '開始藥物治療前 LDL-C（基線）', ldl_current: '目前 LDL-C', hdl: 'HDL-C', tc: '總膽固醇 TC', tc_start: '起始判定用 TC', tg: '空腹 TG', fpg: '空腹血糖' };
@@ -208,7 +211,7 @@ export function importBasis(data, current, show, changed = []) {
     const text = edited && nv(current[f]) === '' ? '帶入後清空' : `${show(f, current[f])}${edited ? '（帶入後修改）' : ''}`;
     return { field: f, label: label(f), text };
   });
-  return { recent: data.recent, meds: data.meds, used, manual, ldl: data.ldl, firstC10: data.firstC10, ref: data.ref, problems: openProblems(data, current) };
+  return { recent: data.recent, meds: data.meds, used, manual, ldl: data.ldl, firstC10: data.firstC10, ref: data.ref, source: data.source, problems: openProblems(data, current) };
 }
 
 // S28 簡潔格式（摘要與結果卡共用）：`項目：值 — 來源 (日期)`；S32 手動輸入 `項目：值`
@@ -240,7 +243,7 @@ export function buildProposals(p) {
   const labProp = (field, key, r, kind, extraNote) => {
     flag(field, key, r.problems, r.row);
     if (!r.row) return;
-    const notes = [extraNote, r.problems.length ? `較新的 ${r.problems.length} 項紀錄有問題（同日不同值、單位不符或非數字）而略過` : '', r.row.qual ? `原始值 ${r.row.raw}，去掉不等號取值` : ''].filter(Boolean);
+    const notes = [extraNote, r.problems.length ? `較新的 ${r.problems.length} 項紀錄有問題（同日不同值、單位不符或非數字）而略過` : '', r.row.qual ? `原始值 ${r.row.raw}，去掉不等號取值` : '', r.row.flag ? `院方標示 ${r.row.flag}（${r.row.flag === 'H' ? '高於' : '低於'}參考區間）` : ''].filter(Boolean);
     add(field, fmt(r.row.value), kind, `檢驗日 ${r.row.date}（${r.row.item || LAB[key].code}）`, { brief: `${plainName(r.row.item || LAB[key].label)} ${rawOf(r.row)}(${r.row.date})`, ...(notes.length ? { note: notes.join('；') } : {}) });
   };
   // S30 現用藥（180 天內有 C10）：起始判定值＝max(治療前基線, 6 個月內最高)；同值取基線；有問題的紀錄不採用（S31）
@@ -424,6 +427,9 @@ export function planApply(items, current, defaults) {
     return { ...it, status: 'apply' };
   });
 }
+
+// 預覽勾選框預設：可帶入才勾；defaultOff（PDF 的基線 LDL-C，pdf_import.md Q-P1）預設不勾
+export const initiallyChecked = (it) => it.status === 'apply' && !it.defaultOff;
 
 // 清除帶入資料：只還原「目前值仍等於帶入值」的欄位
 export function planClear(imported, current) {

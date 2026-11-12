@@ -9,7 +9,7 @@ import { chartSummary, localDate } from './summary.js';
 import { clearRadios, linkHofh } from './tristate.js';
 import { readFields, resetFields, syncMeno, syncDisabled, displayValue, changedFields } from './form_state.js';
 import { importedData, medsBlock, basisBlock, manualBlock } from './nhi_meds_view.js';
-import { importBasis, importContext, RECENT_LIPID_NOTE } from './nhi_import_rules.js';
+import { importBasis, importContext, RECENT_LIPID_NOTE, sourceLabel } from './nhi_import_rules.js';
 
 const tool = TOOLS.find((t) => t.id === 'lipid-nhi-202609');
 document.getElementById('tool-name').textContent = tool.name;
@@ -143,8 +143,8 @@ function render(r) {
       out.append(n);
     }
     if (basis.recent) out.append(el('p', 'notice', RECENT_LIPID_NOTE));
-    block('病人降血脂用藥（健保雲端帶入）').append(medsBlock(basis.meds, r.input.table_choice));
-    block('判讀所用資料（健保雲端帶入）').append(basisBlock(basis));
+    block(`病人降血脂用藥（${sourceLabel(basis)}）`).append(medsBlock(basis.meds, r.input.table_choice));
+    block(`判讀所用資料（${sourceLabel(basis)}）`).append(basisBlock(basis));
     if (basis.manual.length) block('判讀所用資料（手動輸入）').append(manualBlock(basis.manual));
   }
   block('適用表').append(list(r.scope));

@@ -1,6 +1,6 @@
 // 病歷用純文字摘要：chartSummary(evaluate() 的結果, 'YYYY-MM-DD') → 純文字，每行一項。
 // 純函式：只讀引擎輸出的結構化結果，不抓 DOM、不含病人識別資料。台灣病歷慣例以英文縮寫為主。
-import { RECENT_LIPID_NOTE, firstC10Text, basisLine, manualLine, ldlLine } from './nhi_import_rules.js';
+import { RECENT_LIPID_NOTE, firstC10Text, basisLine, manualLine, ldlLine, sourceLabel } from './nhi_import_rules.js';
 import { round2 } from './engine.js';
 
 const HEADER = '[NHI lipid criteria 2.6 (eff. 2026/09/01)]';
@@ -140,6 +140,7 @@ function ezeLine(d) {
 
 // 健保雲端帶入的降脂用藥（nhi_import_rules.js lipidMeds()）：一品項一行；只在有帶入資料時呼叫（S25）
 function medsLines(m) {
+  if (m.unavailable) return [`Lipid-lowering Rx: not available (NCKUH 3-month PDF, data to ${m.ref})`];
   const head = `Lipid-lowering Rx (NHI cloud, captured ${m.ref})`;
   if (!m.current.length && !m.previous.length) return [`${head}: none (ATC C10) in data window`];
   const one = (tag, x) => {
@@ -154,10 +155,10 @@ function basisLines(b) {
   // S31：檢驗值有問題時放最上方，貼回病歷看得到
   const L = b.problems && b.problems.length ? ['Lab issues:', ...b.problems.map((x) => `- ${x}`)] : [];
   if (b.recent) L.push(RECENT_LIPID_NOTE);
-  L.push(...medsLines(b.meds), `判讀所用資料（健保雲端帶入，擷取日 ${b.ref}）：`);
+  L.push(...medsLines(b.meds), b.source === 'pdf' ? `判讀所用資料（${sourceLabel(b)}，資料窗迄日 ${b.ref}）：` : `判讀所用資料（健保雲端帶入，擷取日 ${b.ref}）：`);
   if (!b.used.length) L.push('- 無帶入欄位');
   for (const u of b.used) L.push(`- ${basisLine(u)}`);
-  L.push(`- LDL-C 歷次：${ldlLine(b.ldl)}；${firstC10Text(b.firstC10, b.recent)}`);
+  L.push(`- LDL-C 歷次：${ldlLine(b.ldl)}；${firstC10Text(b.firstC10, b.recent, b.source)}`);
   if (b.manual.length) L.push('判讀所用資料（手動輸入）：', ...b.manual.map((u) => `- ${manualLine(u)}`));
   return L;
 }

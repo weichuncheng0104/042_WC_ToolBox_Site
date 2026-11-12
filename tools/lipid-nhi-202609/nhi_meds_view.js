@@ -46,6 +46,10 @@ export function t2Hint(tableChoice) {
 // meds：lipidMeds() 結果 → 區塊元素
 export function medsBlock(meds, tableChoice) {
   const b = el('div', 'nhi-medsblock');
+  if (meds.unavailable) { // 成大三個月 PDF：無用藥資料
+    b.append(el('p', 'hint', '成大三個月資料摘要 PDF 只含檢驗與檢查報告，無用藥資料；病人降血脂用藥請自行核對、手動填寫。'));
+    return b;
+  }
   if (!meds.current.length && !meds.previous.length) {
     b.append(el('p', 'hint', `資料窗內（擷取日 ${meds.ref}）無降血脂藥（ATC C10）處方。`));
     return b;
@@ -69,11 +73,11 @@ export function manualBlock(manual) {
 // S27 結果卡「判讀所用資料」：basis＝importBasis() 結果 → 區塊元素（帶入值附來源；LDL-C 歷次）
 export function basisBlock(basis) {
   const b = el('div', 'nhi-basis');
-  b.append(el('p', 'hint', `擷取日 ${basis.ref}；只列目前這個 .json 帶入且未修改的欄位。`));
+  b.append(el('p', 'hint', basis.source === 'pdf' ? `資料窗迄日 ${basis.ref}；只列目前這個 .pdf 帶入且未修改的欄位。` : `擷取日 ${basis.ref}；只列目前這個 .json 帶入且未修改的欄位。`));
   const ul = el('ul', 'items');
   if (!basis.used.length) ul.append(el('li', '', '無帶入欄位'));
   for (const u of basis.used) ul.append(el('li', '', basisLine(u))); // S28 簡潔格式，與病歷用摘要一致
-  b.append(ul, el('p', 'nhi-sub', `LDL-C 歷次（資料窗內；${firstC10Text(basis.firstC10, basis.recent)}）`));
+  b.append(ul, el('p', 'nhi-sub', `LDL-C 歷次（資料窗內；${firstC10Text(basis.firstC10, basis.recent, basis.source)}）`));
   if (!basis.ldl.length) b.append(el('p', 'hint', '資料窗內無 LDL-C 檢驗。'));
   else {
     const t = el('table', 'nhi-meds');

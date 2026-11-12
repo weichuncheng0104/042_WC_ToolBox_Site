@@ -1,0 +1,2 @@
+pdfjs-dist 6.4.299（npm，2026-10-03 發布）build/pdf.min.mjs、build/pdf.worker.min.mjs，內容未修改；
+副檔名改為 .js，避免靜態主機以非 JavaScript MIME 提供 .mjs 而無法以 module 載入。授權 Apache-2.0（見 LICENSE）。
